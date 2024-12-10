@@ -1,0 +1,48 @@
+[meta]
+version = 'v0'
+sample = 'CEERs0.9'
+
+[file_structure]
+observations_folder = '/home/vital/PycharmProjects/ceers-data/data/spectra'
+data_folder = '/home/vital/Dropbox/Astrophysics/Data/CAPERS'
+file_log_headers = ["sample", "id", "file", "MSA_number", "alias", "disp", "pointing", "ext",
+                    "z_phot", "z_aspect_brute", "z_aspect_group", "z_manual", "z_bands", "z_gaussian", "z_gaussian_err",
+                    "z_best", "z_qbest",
+                    "n_lines", "emission_confidence",
+                    "file_path"]
+
+fits_ext_list = ['s2d.fits', 'x1d.fits', 'x1d-masked.fits', 'x1d-optext.fits', 'x1d-optext-masked.fits', 's2d-mbkg.fits',
+                 'x1d-mbkg.fits', 'x1d-mbkg-masked.fits']
+
+ext_1d_fits = ['x1d-optext-masked', 'x1d-optext', 'x1d-masked', 'x1d']
+
+CEERs_redshift_file = 'CEERS_NIRSpec_MSA_catalog_dr0.9_extended.csv'
+
+prism_bands = 'CAPERS_prism_bands.txt'
+redshift_bands = 'CAPERS_prism_bands_redshift.txt'
+
+prism_R_curve_file = 'jwst_nirspec_prism_disp.fits'
+
+[data]
+norm_flux = 1e-22
+default_prism_cfg_section = 'default_prism'
+boundary_prism_cfg_section = 'boundary_prism'
+
+[default_prism_line_fitting]
+O2_3729A_m = "O2_3727A+O2_3730A"
+H1_4862A_b = "H1_4862A+O3_4960A+O3_5008A"
+H1_4862A_m = "H1_4862A+O3_4960A+O3_5008A"
+O3_5008A_m = "O3_5008A+O3_4960A"
+O3_5008A_b = "O3_5008A+O3_4960A"
+H1_6565A_m = "H1_6565A+N2_6585A+N2_6550A+S2_6718A+S2_6732A"
+H1_6565A_b = "H1_6565A+S2_6718A+S2_6733A"
+S2_6718A_m = "S2_6718A+S2_6733A"
+O2_7321A_m = "O2_7321A+O2_7332A"
+He1_10833A_m = "He1_10833A+H1_10941A"
+
+[boundary_prism_line_fitting]
+O3_4960A_kinem = "O3_5008A"
+H1_4862A_kinem = "O3_5008A"
+O3_4960A_amp = "expr:O3_5008A_amp/2.91"
+He1_10833A_b = "He1_10833A+H1_10941A"
+H1_10941A_kinem = "He1_10833A"
