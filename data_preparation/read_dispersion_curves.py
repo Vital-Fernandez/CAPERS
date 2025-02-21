@@ -2,6 +2,24 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 import numpy as np
 import lime
+from scipy.interpolate import interp1d
+from support.tools import read_prism_r_curve
+
+x = np.array([0, 1, 2, 3, 4, 5])  # Independent variable
+y = np.array([0, 1, 4, 9, 16, 25])  # Dependent variable
+
+# Create an interpolator function
+# 'kind' can be 'linear', 'quadratic', 'cubic', etc., depending on the desired interpolation
+
+def get_res_power_interpolator(fname):
+
+    with fits.open(fname) as hdul:
+        data_rec = hdul[1].data
+
+    intpl = interp1d(data_rec['WAVELENGTH'], data_rec['R'], kind='linear', fill_value="extrapolate")
+
+    return intpl
+
 
 file_address = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/source/jwst_nirspec_prism_disp.fits'
 print(fits.info(file_address))
@@ -30,11 +48,17 @@ In the dispersion curve files from the NIRSpec instrument, the column labeled 'd
    (μm/pixel), and resolution (λ/Δλ, unitless).
 '''
 
+# interpolator = interp1d(data['WAVELENGTH'], data['R'], kind='linear', fill_value="extrapolate")
+units_factor = 10000
+interpolator = read_prism_r_curve(file_address, units_factor=units_factor)
+
 fig, ax = plt.subplots()
 ax2 = ax.twinx()
-disper_line = ax.plot(data['WAVELENGTH'], data['DLDS'], label='Dispersion', color='tab:green')
-R_line = ax2.plot(data['WAVELENGTH'], data['R'], label='R')
-R_line += ax2.plot(wave_arr, R_arr, label='LiMe R')
+disper_line = ax.plot(data['WAVELENGTH']*units_factor, data['DLDS'], label='Dispersion', color='tab:green')
+R_line = ax2.plot(data['WAVELENGTH']*units_factor, data['R'], label='R')
+R_line += ax2.plot(wave_arr*units_factor, R_arr, label='LiMe R')
+R_line += ax2.plot(wave_arr*units_factor, interpolator(wave_arr*units_factor), label='Interpolation R', linestyle=':', color='red')
+print(R_arr/interpolator(wave_arr))
 ax.update({'xlabel':r'wavelength $(\mu m)$', 'ylabel':r'Dispersion $(\mu m / pixel)$', 'title':'NIRSPEC Prism dispersion curve'})
 ax2.update({'ylabel':r'$R = \frac{\lambda}{\Delta \lambda}$'})
 lines = disper_line + R_line

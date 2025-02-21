@@ -1,8 +1,7 @@
-import pandas as pd
-
 import lime
 import numpy as np
-from support.tools import search_spectra_ceers, create_backup
+import pandas as pd
+from support.tools import search_spectra_capers, create_backup
 from pathlib import Path
 
 # Load configuration
@@ -20,14 +19,14 @@ source_folder = data_folder/'source'
 
 fits_ext_list = capers_cfg['file_structure']['fits_ext_list']
 file_log_headers = capers_cfg['file_structure']['file_log_headers']
-# ceers_redshift_name = capers_cfg['file_structure']['CEERs_redshift_file']
-ceers_redshift_name = capers_cfg['file_structure']['CEERs_redshift_file']
+capers_redshift_file = capers_cfg['file_structure']['CAPERs_redshift_file']
+redshift_df = pd.read_csv(capers_redshift_file, delimiter=',', index_col=0)
 
 # Create day back-ups
-create_backup(tables_folder/f'{sample}_{version}_files_log.txt')
+create_backup(tables_folder/f'{sample}_files_log.txt')
 
 # Search the file names
-raw_spectra_list = search_spectra_ceers(observations_folder/'CEERs_DR0.9', ext_list=fits_ext_list)
+raw_spectra_list = search_spectra_capers(observations_folder/sample, ext_list=fits_ext_list)
 
 # Adjust the selection
 # spectra_list = review_masked_files(raw_spectra_list)
@@ -46,46 +45,67 @@ for idx_spec, fits_file in enumerate(spectra_list):
     file_dir = Path(*dir_parts)
     file_name = fits_file.name
 
-    file_path = Path('/'.join(fits_file.parts[7:-1]))/file_name
-    pointing_dir = dir_parts[7]
+    file_path = Path('/'.join(fits_file.parts[5:-1]))/file_name
+    pointing_dir = dir_parts[5]
 
     name_comps = file_name.split('_')
-    disp = name_comps[5] #dir_parts[2]
-    pointing_name, id_label = name_comps[4].split('-')
+    disp = 'prism'
+    pointing_name = name_comps[2]
 
     # MSA = int(id_label)
-    MSA_number = int(id_label)
-    id_label = str(int(id_label)) if pointing_name != 'nirspecDDT' else 'D' + str(int(id_label))
-
+    id_label = name_comps[3]
+    MPT_number = int(id_label[1:])
     ext = name_comps[-1][0:-5]
 
     if pointing_name != pointing_dir:
         print(f'Missmatch folder: {pointing_dir} != {file_path}')
 
-    file_log.loc[(sample, id_label, file_name), "MSA_number"] = MSA_number
+    file_log.loc[(sample, id_label, file_name), "MPT_number"] = MPT_number
     file_log.loc[(sample, id_label, file_name), "disp"] = disp
     file_log.loc[(sample, id_label, file_name), "pointing"] = pointing_name
     file_log.loc[(sample, id_label, file_name), "ext"] = ext
     file_log.loc[(sample, id_label, file_name), "file_path"] = file_path.as_posix()
 
-# Adjust and organize the dataframe
-idcs_ddt = file_log.pointing == 'nirspecDDT'
-ceers_df = file_log.loc[~idcs_ddt].copy()
-ddt_df = file_log.loc[idcs_ddt].copy()
+# idcs_ddt = file_log.pointing == 'nirspecDDT'
+# ceers_df = file_log.loc[~idcs_ddt].copy()
+# ddt_df = file_log.loc[idcs_ddt].copy()
+#
+# ceers_df.sort_values(by=['MPT_number', 'disp', 'ext'], ascending=[True, True, True], inplace=True)
+# ddt_df.sort_values(by=['MPT_number', 'disp', 'ext'], ascending=[True, True, True], inplace=True)
+# file_log = pd.concat([ceers_df, ddt_df], axis=0)
 
-ceers_df.sort_values(by=['MSA_number', 'disp', 'ext'], ascending=[True, True, True], inplace=True)
-ddt_df.sort_values(by=['MSA_number', 'disp', 'ext'], ascending=[True, True, True], inplace=True)
-file_log = pd.concat([ceers_df, ddt_df], axis=0)
+# Adjust and organize the dataframe
+file_log.sort_values(by=['MPT_number', 'ext'], ascending=[True, True], inplace=True)
 
 # Add previous measurements
-redshift_df = pd.read_csv('/home/vital/Dropbox/Astrophysics/Data/CEERs/RedShift_compilation/CEERS_NIRSpec_MSA_catalog_dr0.9_extended.csv', delimiter=';', index_col=0)
-MSA_list = redshift_df.index.unique()
-for MSA in MSA_list:
-    idcs_obj = file_log.index.get_level_values('id') == MSA
-    file_log.loc[idcs_obj, 'z_phot'] = redshift_df.loc[MSA, 'z_best']
-    file_log.loc[idcs_obj, 'ra'] = redshift_df.loc[MSA, 'ra']
-    file_log.loc[idcs_obj, 'dec'] = redshift_df.loc[MSA, 'dec']
-lime.save_frame(tables_folder/f'{sample}_{version}_files_log.txt', file_log)
+MPT_list = redshift_df.index.unique()
+for MPT in MPT_list:
+    idcs_obj = file_log.MPT_number == MPT
+    file_log.loc[idcs_obj, 'z_med'] = redshift_df.loc[MPT, 'z_med']
+    file_log.loc[idcs_obj, 'z_UNICORN'] = redshift_df.loc[MPT, 'z_UNICORN']
+    file_log.loc[idcs_obj, 'ra'] = redshift_df.loc[MPT, 'ra']
+    file_log.loc[idcs_obj, 'dec'] = redshift_df.loc[MPT, 'dec']
+
+    file_log.loc[idcs_obj, 'flux_F277W'] = redshift_df.loc[MPT, 'flux_F277W']
+    file_log.loc[idcs_obj, 'flux_F356W'] = redshift_df.loc[MPT, 'flux_F356W']
+    file_log.loc[idcs_obj, 'flux_F444W'] = redshift_df.loc[MPT, 'flux_F444W']
+    file_log.loc[idcs_obj, 'MSA_weight'] = redshift_df.loc[MPT, 'MSA_weight']
+    file_log.loc[idcs_obj, 'n_nods'] = redshift_df.loc[MPT, 'n_nods']
+    file_log.loc[idcs_obj, 'n_visits'] = redshift_df.loc[MPT, 'n_visits']
+    file_log.loc[idcs_obj, 'visit_1'] = redshift_df.loc[MPT, 'visit_1']
+    file_log.loc[idcs_obj, 'visit_2'] = redshift_df.loc[MPT, 'visit_2']
+    file_log.loc[idcs_obj, 'visit_3'] = redshift_df.loc[MPT, 'visit_3']
+    file_log.loc[idcs_obj, 'eff_exp_time'] = redshift_df.loc[MPT, 'eff_exp_time']
+    file_log.loc[idcs_obj, 'shutter_centering'] = redshift_df.loc[MPT, 'shutter_centering']
+
+
+redshift_manual_df = lime.load_frame('/home/vital/Dropbox/Astrophysics/Data/CAPERS/tables/CAPERS_UDS_V0.1_files_log_ORIGINAL.txt',
+                                     levels=["sample", "id", "file"])
+
+idcs_manual = redshift_manual_df.loc[pd.notnull(redshift_manual_df.z_manual)].index
+for idx in idcs_manual:
+    if idx in file_log.index:
+        file_log.loc[idx, 'z_manual'] = redshift_manual_df.loc[idx, 'z_manual']
 
 
 # redshift_df = pd.read_csv(source_folder/ceers_redshift_name, delimiter=';', index_col=0)
@@ -99,3 +119,5 @@ lime.save_frame(tables_folder/f'{sample}_{version}_files_log.txt', file_log)
 #
 # # Save the log
 # lime.save_frame(tables_folder/f'{sample}_{version}_files_log.txt', file_log)
+
+lime.save_frame(tables_folder/f'{sample}_files_log.txt', file_log)
