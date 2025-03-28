@@ -2,18 +2,6 @@
 version = '0.1'
 sample = 'CAPERS_UDS_V0.1'
 
-#undefined = 0
-#white-noise = 1
-#continuum = 2
-#emission = 3
-#cosmic-ray = 4
-#pixel-line = 5
-#broad = 6
-#doublet = 7
-#peak = 8
-#absorption = 9
-#dead-pixel = 10
-
 [file_structure]
 #observations_folder = '/home/vital/PycharmProjects/ceers-data/data/spectra'
 observations_folder = '/home/vital/Astrodata/CAPERS'

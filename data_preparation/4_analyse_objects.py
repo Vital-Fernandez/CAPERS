@@ -43,6 +43,8 @@ files_sample = lime.Sample(log_address, levels=["sample", "id", "file"], load_fu
 # idcs_selection = files_sample.frame.disp == 'prism' # files_sample.index
 # files_sample = files_sample[idcs_selection]
 
+lime.line_bands(wave_intvl=spec, ref_bands='CAPERS_prism_bands_redshift.txt')
+
 # Treatment selection
 start_object = 0
 ASPECT_CHECK = False

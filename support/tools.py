@@ -15,6 +15,16 @@ Z_FUNC_CMAP = ZScaleInterval()
 
 TARGET_COMPONENTS = np.array(['emission', 'cosmic-ray', 'doublet', 'absorption', 'dead-pixel'])
 
+def recover_bands(ref_bands, fname, spec, components_detection=False, fit_confg=None):
+
+    # Prepare bands file if not available
+    if fname.is_file():
+        obj_bands = lime.load_frame(fname)
+    else:
+        obj_bands = spec.retrieve.line_bands(band_vsigma=100, ref_bands=ref_bands, components_detection=components_detection,
+                                             fit_conf=fit_confg)
+
+    return obj_bands
 
 def catch_nan_spectra(log_df, id_file, redshift):
 
@@ -45,7 +55,6 @@ def search_spectra_ceers(root_folder, ext_list):
 
     return file_list
 
-
 def search_spectra_capers(root_folder, ext_list):
 
     # Change type to path
@@ -60,8 +69,6 @@ def search_spectra_capers(root_folder, ext_list):
                 file_list += list(point_folder.glob(f'*{ext}'))
 
     return file_list
-
-
 
 def review_masked_files(file_list):
 
@@ -82,7 +89,6 @@ def review_masked_files(file_list):
                 print(f'Missing object: {spec_address.name}')
 
     return new_file_list
-
 
 def create_backup(file_path):
 
@@ -119,7 +125,6 @@ def create_backup(file_path):
         print(f"Backup created: {backup_path}")
 
     return
-
 
 def unpack_nirspec_fits(fname):
 
@@ -183,7 +188,7 @@ def nirspec_load_function(log_df, obs_idx, data_folder, **kwargs):
             detection_file = Path(detection_file)
             if detection_file.is_file():
                 pred_arr, conf_arr = np.loadtxt(detection_file, dtype=int, unpack=True)
-                objSpec.features.pred_arr, objSpec.features.conf_arr = pred_arr, conf_arr
+                objSpec.infer.pred_arr, objSpec.infer.conf_arr = pred_arr, conf_arr
 
         # Add log if present
         print()
@@ -194,11 +199,10 @@ def nirspec_load_function(log_df, obs_idx, data_folder, **kwargs):
 
     return objSpec
 
-
 def save_detection_results(spectrum, idx, sample, obj_comps_file):
 
     # Extract prediction and confidence arrays
-    pred_arr, conf_arr = spectrum.features.pred_arr, spectrum.features.conf_arr
+    pred_arr, conf_arr = spectrum.infer.pred_arr, spectrum.infer.conf_arr
 
     # Getting the indexes
     for shape in TARGET_COMPONENTS:
@@ -231,7 +235,7 @@ def save_detection_results(spectrum, idx, sample, obj_comps_file):
     #     num_true_segm, mean_conf = 0, 0
 
     # Save the results in table
-    sample.loc[idx, 'n_lines'] = sample.loc[idx, f'n_emission'] + sample.loc[idx, f'n_doublet']
+    sample.loc[idx, 'n_lines'] = sample.loc[idx, f'n_emission'] + sample.loc[idx, f'n_doublet']  + sample.loc[idx, f'n_absorption']
     # sample.loc[idx, 'n_lines'] = num_true_segm
     # sample.loc[idx, 'emission_confidence'] = mean_conf
 

@@ -28,11 +28,6 @@ spec.plot.spectrum(rest_frame=True)
 cHbeta, cHbeta_err = sy.extinction.cHbeta_from_log(lines_df, ref_line='H1_4862A', flux_entry='profile',
                                             lines_ignore=['H1_3889A', 'H1_3971A'], show_plot=True)
 
-
-C3_1909A      9.296337
-O3_5008A      9.269236
-
-
 lime.normalize_fluxes(lines_df, norm_list='H1_4862A')
 flux_dict = sy.flux_distribution(lines_df, flux_type='line_flux')
 # print(flux_dict)

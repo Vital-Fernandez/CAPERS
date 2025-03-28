@@ -98,32 +98,32 @@ for i, obj in enumerate(obj_list):
                             # spec.plot.spectrum()
                             spec.features.detection(show_steps=False, exclude_continuum=True)
                             save_detection_results(spec, idx_obj, files_sample, obj_comps_file)
-                            # spec.plot.spectrum(show_categories=True)
+                            spec.plot.spectrum(show_categories=True)
 
-                            # Get Aspect redshift
-                            if files_sample.loc[idx_obj, 'n_lines'] >= 1:
-                                z_phot = obj_sample.loc[idx_obj, "z_UNICORN"]
-                                res_power = R_interpolator(spec.wave.data)
-                                print(f'- Phot value: z_phot = {z_phot}')
-                                z_brute = spec.fit.redshift(redshift_bands_df, res_power=res_power, plot_results=False, sigma_factor=1)
-                                z_brute_bound =  spec.fit.redshift(redshift_bands_df, res_power=res_power, plot_results=False, sigma_factor=1,
-                                                                   z_min=np.maximum(z_phot-1.5,0), z_max=np.minimum(z_phot+1.5, 12))
-                                files_sample.loc[idx_obj, 'z_aspect_brute'] = z_brute
-                                files_sample.loc[idx_obj, 'z_aspect_brute_bound'] = z_brute_bound
-
-                                print(f'- aspect check: z_brute = {z_brute}')
-                                title = id_message + f', z_brute = {z_brute}'
-                                # spec.update_redshift(0 if z_brute is None else z_brute)
-                                # spec.plot.spectrum(show_categories=True, ax_cfg={'title': title}, bands=prism_bands_df,
-                                #                    # maximize=True)
-                                #                    output_address=comps_folder/f'{fits_stem}_components.png')
-
-                counter += 1
-
-# Save the dataframe with the ASPECT redshifts
-lime.save_frame(log_address, files_sample.frame)
-
-# Show the objects with errors
-for object, error_msg in error_objects.items():
-    print(f'{object} : {error_msg}')
+#                             # Get Aspect redshift
+#                             if files_sample.loc[idx_obj, 'n_lines'] >= 1:
+#                                 z_phot = obj_sample.loc[idx_obj, "z_UNICORN"]
+#                                 res_power = R_interpolator(spec.wave.data)
+#                                 print(f'- Phot value: z_phot = {z_phot}')
+#                                 z_brute = spec.fit.redshift(redshift_bands_df, res_power=res_power, plot_results=False, sigma_factor=1)
+#                                 z_brute_bound =  spec.fit.redshift(redshift_bands_df, res_power=res_power, plot_results=False, sigma_factor=1,
+#                                                                    z_min=np.maximum(z_phot-1.5,0), z_max=np.minimum(z_phot+1.5, 12))
+#                                 files_sample.loc[idx_obj, 'z_aspect_brute'] = z_brute
+#                                 files_sample.loc[idx_obj, 'z_aspect_brute_bound'] = z_brute_bound
+#
+#                                 print(f'- aspect check: z_brute = {z_brute}')
+#                                 title = id_message + f', z_brute = {z_brute}'
+#                                 # spec.update_redshift(0 if z_brute is None else z_brute)
+#                                 # spec.plot.spectrum(show_categories=True, ax_cfg={'title': title}, bands=prism_bands_df,
+#                                 #                    # maximize=True)
+#                                 #                    output_address=comps_folder/f'{fits_stem}_components.png')
+#
+#                 counter += 1
+#
+# # Save the dataframe with the ASPECT redshifts
+# lime.save_frame(log_address, files_sample.frame)
+#
+# # Show the objects with errors
+# for object, error_msg in error_objects.items():
+#     print(f'{object} : {error_msg}')
 
