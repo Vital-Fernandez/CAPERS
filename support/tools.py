@@ -8,8 +8,7 @@ from scipy.interpolate import interp1d
 from astropy.visualization import ZScaleInterval
 from matplotlib import pyplot as plt
 from matplotlib.widgets import SpanSelector
-from lime.io import LiMe_Error
-
+from lime.tools import pd_get
 
 Z_FUNC_CMAP = ZScaleInterval()
 
@@ -25,17 +24,6 @@ def recover_bands(ref_bands, fname, spec, components_detection=False, fit_confg=
                                              fit_conf=fit_confg)
 
     return obj_bands
-
-def catch_nan_spectra(log_df, id_file, redshift):
-
-    try:
-        spec = log_df.get_spectrum(id_file, redshift=redshift)
-        err_message = None
-    except LiMe_Error as e:
-        spec = None
-        err_message = e
-
-    return spec, err_message
 
 def search_spectra_ceers(root_folder, ext_list):
 
@@ -136,66 +124,70 @@ def unpack_nirspec_fits(fname):
 
     return wave_array, flux_array, err_array, header
 
-def nirspec_load_function(log_df, obs_idx, data_folder, **kwargs):
+def capers_load_function(log_df, obs_idx, data_folder, **kwargs):
 
     # Use redshift provided
-    if kwargs.get('redshift') is not None:
+    if 'redshift' in kwargs:
         z_obj = kwargs['redshift']
 
-    # Else use the log redshift from input column
+    # Or get it from log
     else:
-        z_column = kwargs['z_column']
+        z_obj = pd_get(log_df, obs_idx, kwargs['z_column'], default=None)
 
-        z_obj = log_df.loc[obs_idx, z_column]
-        z_obj = None if np.isnan(z_obj) else z_obj
-
+    # Flux normalization
     norm_flux = kwargs['norm_flux']
 
     # Interpolator for the R
     R_interpolator = kwargs.get('R_interpolator')
 
     # Get file address
-    file_spec = Path(data_folder)/log_df.loc[obs_idx, 'file_path']
+    file_spec = Path(data_folder)/kwargs['file_path']
 
     # 2d files
     if "s2d" in file_spec.as_posix():
         wave_array, flux_array, err_array, header = unpack_nirspec_fits(file_spec)
         wave_array = wave_array * 10000
-        objSpec = wave_array, flux_array, err_array, header
 
-        # with fits.open(file_spec) as hdu_list:
-        #     header = (hdu_list[0].header, hdu_list[1].header)
-        #     wave_array = np.linspace(header[1]['WAVSTART'], header[1]['WAVEND'], header[1]['NAXIS1'], endpoint=True) * 10000
-        #     flux_array = hdu_list[1].data
-        #     err_array = hdu_list[2].data
+        if not np.all(np.isnan(flux_array)):
+            objSpec = wave_array, flux_array, err_array, header
+        else:
+            objSpec = None
 
     # 1d files
-    elif "x1d" in file_spec.as_posix():
-        objSpec = lime.Spectrum.from_file(file_spec, instrument='nirspec', norm_flux=norm_flux, redshift=z_obj)
-        objSpec.unit_conversion(wave_units_out='Angstrom', flux_units_out='FLAM', norm_flux=norm_flux)
-
-        if R_interpolator is not None:
-            objSpec.inst_FWHM = objSpec.wave.data/R_interpolator(objSpec.wave.data)
-
-        with fits.open(file_spec) as hdu_list:
-            header = hdu_list[1].header
-
-        objSpec.header = header
-
-        # Include detection arrays if available
-        detection_file = kwargs.get('detection_file')
-        if detection_file is not None:
-            detection_file = Path(detection_file)
-            if detection_file.is_file():
-                pred_arr, conf_arr = np.loadtxt(detection_file, dtype=int, unpack=True)
-                objSpec.infer.pred_arr, objSpec.infer.conf_arr = pred_arr, conf_arr
-
-        # Add log if present
-        print()
-
-    # Unknown
     else:
-        raise KeyError(f'Not recognizing the file type: {file_spec.as_posix()}')
+        objSpec = lime.Spectrum.from_file(file_spec, instrument='nirspec', norm_flux=norm_flux, redshift=z_obj)
+
+        if not np.all(objSpec.flux.mask):
+            objSpec.unit_conversion(wave_units_out='Angstrom', flux_units_out='FLAM', norm_flux=norm_flux)
+
+            if R_interpolator is not None:
+                objSpec.inst_FWHM = objSpec.wave.data/R_interpolator(objSpec.wave.data)
+
+            with fits.open(file_spec) as hdu_list:
+                header = hdu_list[1].header
+
+            objSpec.header = header
+
+            # Include detection arrays if available
+            detection_file = kwargs.get('detection_file')
+            if detection_file is not None:
+                detection_file = Path(detection_file)
+                if detection_file.is_file():
+                    pred_arr, conf_arr = np.loadtxt(detection_file, dtype=int, unpack=True)
+                    objSpec.infer.pred_arr, objSpec.infer.conf_arr = pred_arr, conf_arr
+
+            # Load the measurements log
+            log_path = kwargs.get('log_path')
+            if log_path is not None:
+                objSpec.load_frame(log_path)
+
+            # Compute resolving power
+            r_interpolator = kwargs.get('r_interpolator')
+            if r_interpolator is not None:
+                objSpec.res_power = r_interpolator(objSpec.wave.data)
+
+        else:
+            objSpec = None
 
     return objSpec
 
@@ -282,6 +274,21 @@ def maximize_center_fig(maximize_check=False, center_check=False):
             print()
 
     return
+
+def z_selection(files_sample, idx_obj):
+
+    z_tier = files_sample.loc[idx_obj, 'z_tier']
+    match z_tier:
+        case 4:
+            z_obj = files_sample.loc[idx_obj, 'z_gaussian']
+        case 3:
+            z_obj = files_sample.loc[idx_obj, 'z_manual']
+        case 2:
+            z_obj = files_sample.loc[idx_obj, 'z_aspect_key']
+        case _:
+            z_obj = None
+
+    return z_tier, z_obj
 
 class TraceSelection:
 
