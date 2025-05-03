@@ -186,6 +186,14 @@ def capers_load_function(log_df, obs_idx, data_folder, **kwargs):
             if r_interpolator is not None:
                 objSpec.res_power = r_interpolator(objSpec.wave.data)
 
+            # Measurements
+            lines_log_path = kwargs.get('lines_log_path')
+            if lines_log_path is not None:
+                if lines_log_path.is_file():
+                    objSpec.load_frame(lines_log_path)
+                else:
+                    print('-No logs file')
+
         else:
             objSpec = None
 

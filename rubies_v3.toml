@@ -1,14 +1,16 @@
 [meta]
 version = '0.2'
-sample = 'CAPERS_EGS_V0.2.1' #'CAPERS_EGS_V0.2'
+sample = 'rubies_grat' #'CAPERS_EGS_V0.2'
 #sample = 'CAPERS_UDS_V0.1'
 #sample = 'CAPERS_COSMOS_V0.2'
 
 [file_structure]
-observations_folder = '/home/vital/Astrodata/CAPERS'
+observations_folder = '/home/vital/Astrodata/Rubies'
 data_folder = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/sample'
 source_folder = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/source'
 
+'rubies_prism_redshift_file' = 'none'
+'rubies_grat_redshift_file' = 'none'
 'CAPERS_COSMOS_V0.2_redshift_file' = 'CAPERS_COSMOS_master_yield_v3.csv'
 'CAPERS_UDS_V0.1_redshift_file' = 'CAPERS_UDS_master_yield_v2.csv'
 'CAPERS_EGS_V0.2.1_redshift_file' = 'CAPERS_EGS_master_yield_v2.csv'
@@ -50,8 +52,9 @@ ext_1d_fits = ['optext', 'x1d']
 
 [lines_data]
 
-line_composites_high_z = ['O2_3726A_m', 'Ne3_3869A_m', 'H1_4340A_m', 'H1_4861A', 'O3_5007A_b', 'H1_6563A_m', 'S2_6716A_m']
+line_composites_high_z = ['O2_3726A_m', 'Ne3_3869A_m', 'H1_4340A_m', 'H1_4861A_b', 'H1_6563A_m', 'S2_6716A_m']
 line_composites_medium_z = ['O2_3726A_m', 'Ne3_3869A_m', 'H1_4340A_m', 'H1_4861A', 'O3_5007A_m', 'H1_6563A_m', 'S2_6716A_m', 'He1_10832A_b']
+line_composites_grat = ['O2_3726A_m', 'Ne3_3869A_m', 'S2_6716A_b']
 
 
 lines_database =  ['H1_1216A', 'He2_1640A', 'C3_1909A', 'Ne5_3426A', 'O2_3726A',
@@ -100,9 +103,6 @@ boundary_prism_cfg_section = 'boundary_prism'
 #He1_10832A_m = "He1_10832A+H1_10941A"
 
 [default_prism_line_fitting]
-continuum.degree_list=[3, 5, 6, 7]
-continuum.emis_threshold=[3, 2, 2, 1.5]
-
 O2_3726A_m = "O2_3726A+O2_3729A"
 Ne3_3869A_m = "Ne3_3869A+H1_3889A+He1_3889A"
 H1_4340A_b = "H1_4340A+O3_4363A"
@@ -112,7 +112,9 @@ H1_4861A_m = "H1_4861A+O3_4959A+O3_5007A"
 O3_5007A_m = "O3_5007A+O3_4959A"
 O3_5007A_b = "O3_5007A+O3_4959A"
 H1_6563A_m = "H1_6563A+N2_6583A+N2_6548A"
+H1_6563A_b = "H1_6563A+N2_6583A+N2_6548A"
 S2_6716A_m = "S2_6716A+S2_6731A"
+S2_6716A_b = "S2_6716A+S2_6731A"
 O2_7321A_m = "O2_7321A+O2_7332A"
 He1_10832A_m = "He1_10832A+H1_10941A"
 He1_10832A_b = "He1_10832A+H1_10941A"
@@ -121,15 +123,12 @@ He1_10832A_b = "He1_10832A+H1_10941A"
 O3_4959A_kinem = "O3_5007A"
 H1_4861A_kinem = "O3_5007A"
 O3_4959A_amp = "expr:O3_5007A_amp/2.91"
-H1_10941A_kinem = "He1_10832A"
 
-[119334_line_fitting]
-H1_4861A_b = "H1_4861A+H1_4861A_k-1+O3_5007A+O3_4959A"
-
-H1_4861A_kinem = "O3_5007A"
+[s43626_jw04233006002_CEERS-FULL-V2_CLEAR_PRISM_s43626_x1d_line_fitting]
 O3_4959A_kinem = "O3_5007A"
+H1_4861A_kinem = "O3_5007A"
 O3_4959A_amp = "expr:O3_5007A_amp/2.91"
-H1_4861A_amp = "min:3"
+O2_3726A_m = "O2_3726A+O2_3729A+Ne3_3869A+H1_3889A+He1_3889A"
 
 #H1_4340A_b = "H1_4340A+H1_4340A_k-1"
 #H1_4340A_k-1_center = 'expr:H1_4340A_center'
@@ -153,10 +152,74 @@ H1_4340A_b = "H1_4340A+O3_4363A"
 O3_4363A_kinem = "O3_5007A"
 O3_4363A_amp = "min:3"
 
-[s000011585_CAPERS_EGS_P3_s000011585_x1d_optext_line_fitting]
+[s00001_jw04233006002_CEERS-FULL-V2_F290LP_G395M_s00001_x1d_line_fitting]
 H1_6563A_b = "H1_6563A+H1_6563A_k-1"
 H1_6563A_k-1_sigma = "expr:>1*H1_6563A_sigma"
 
-H1_4861A_b = "H1_4861A+H1_4861A_k-1"
-H1_4861A_k-1_sigma = "expr:>1*H1_4861A_sigma"
-H1_4861A_k-1_center = "expr:H1_4861A_center"
+[s00006_jw04233005003_CEERS-FULL-V2_F290LP_G395M_s00006_x1d_line_fitting]
+H1_6563A_b = "H1_6563A+H1_6563A_k-1"
+H1_6563A_k-1_sigma = "expr:>2*H1_6563A_sigma"
+
+[s00010_jw04233005001_CEERS-FULL-V2_F290LP_G395M_s00010_x1d_line_fitting]
+H1_6563A_b = "H1_6563A+H1_6563A_k-1"
+H1_6563A_k-1_sigma = "expr:>3*H1_6563A_sigma"
+
+[s06411_jw04233005001_CEERS-FULL-V2_F290LP_G395M_s06411_x1d_line_fitting]
+H1_6563A_b = "H1_6563A+H1_6563A_k-1"
+H1_6563A_k-1_sigma = "expr:>1*H1_6563A_sigma"
+
+[s19489_jw04233005001_CEERS-FULL-V2_F290LP_G395M_s19489_x1d_line_fitting]
+O3_5007A_b = "O3_5007A+O3_5007A_k-1"
+O3_5007A_k-1_sigma = "expr:>1*O3_5007A_sigma"
+
+[s24489_jw04233005002_CEERS-FULL-V2_F290LP_G395M_s24489_x1d_line_fitting]
+S2_6716A_b = "S2_6716A+S2_6731A"
+S2_6716A_kinem = "S2_6731A"
+
+[s28812_jw04233006003_CEERS-FULL-V2_F290LP_G395M_s28812_x1d_line_fitting]
+H1_6563A_b = 'H1_6563A+H1_6563A_k-1+N2_6583A+N2_6548A'
+H1_6563A_k-1_sigma = 'expr:>3.0*H1_6563A_sigma'
+#H1_6563A_k-2_sigma = 'expr:>6.0*H1_6563A_sigma'
+#H1_6563A_k-2_center = 'expr:H1_6563A_k-1_center'
+#H1_6563A_p-g-abs_center = 'value:6545,min:6541,max:6548'
+N2_6583A_kinem = 'H1_6563A'
+N2_6548A_kinem = 'H1_6563A'
+N2_6583A_amp = 'min:10000000'
+N2_6548A_amp = 'expr:N2_6583A_amp/2.94'
+
+[s42046_jw04233005003_CEERS-FULL-V2_F290LP_G395M_s42046_x1d_line_fitting]
+H1_6563A_b = 'H1_6563A+H1_6563A_k-1+H1_6563A_k-2'
+#H1_6563A_k-1_sigma = 'expr:>1.0*H1_6563A_sigma'
+H1_6563A_k-1_center = 'min:6540,max:6550'
+H1_6563A_k-2_sigma = 'expr:>1.0*H1_6563A_k-1_sigma'
+H1_6563A_k-2_center = 'expr:H1_6563A_center'
+H1_4861A_b = 'H1_4861A+H1_4861A_k-1+H1_4861A_k-2'
+H1_4861A_k-1_center = 'min:4836,max:4849'
+#H1_4861A_k-1_sigma = 'expr:>1.0*H1_4861A_sigma'
+H1_4861A_k-2_sigma = 'expr:>1.0*H1_4861A_k-1_sigma'
+H1_4861A_k-2_center = 'expr:H1_4861A_center'
+
+[s46318_jw04233006002_CEERS-FULL-V2_F290LP_G395M_s46318_x1d_line_fitting]
+H1_6563A_b = 'H1_6563A+N2_6583A+N2_6548A'
+N2_6548A_amp = 'expr:N2_6583A_amp/2.94'
+N2_6548A_kinem = 'N2_6583A'
+
+[s50052_jw04233005003_CEERS-FULL-V2_F290LP_G395M_s50052_x1d_line_fitting]
+H1_6563A_b = "H1_6563A+H1_6563A_k-1"
+H1_6563A_k-1_sigma = "expr:>3*H1_6563A_sigma"
+
+[s55604_jw04233006001_CEERS-FULL-V2_F290LP_G395M_s55604_x1d_line_fitting]
+H1_4861A_b = 'H1_4861A+H1_4861A_k-1+H1_4861A_k-2'
+H1_4861A_k-1_center = 'min:4848,max:4855'
+#H1_4861A_k-1_sigma = 'expr:>1.0*H1_4861A_sigma'
+H1_4861A_k-2_sigma = 'expr:>6.0*H1_4861A_k-1_sigma'
+H1_4861A_k-2_center = 'expr:H1_4861A_center'
+
+[s60935_jw04233006001_CEERS-FULL-V2_F290LP_G395M_s60935_x1d_line_fitting]
+H1_6563A_b = "H1_6563A+H1_6563A_k-1"
+H1_6563A_k-1_sigma = "expr:>2*H1_6563A_sigma"
+
+[s70473_jw04233006001_CEERS-FULL-V2_F290LP_G395M_s70473_x1d_line_fitting]
+H1_6563A_b = 'H1_6563A+N2_6583A+N2_6548A'
+N2_6548A_amp = 'expr:N2_6583A_amp/2.94'
+N2_6548A_kinem = 'N2_6583A'
