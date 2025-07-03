@@ -11,7 +11,7 @@ lime.theme.set_style('dark')
 cfg_file = '../CAPERS_v3.toml'
 capers_cfg = lime.load_cfg(cfg_file)
 
-sample_list = ['CAPERS_EGS_V0.2.1', 'CAPERS_COSMOS_V0.2', 'CAPERS_UDS_V0.1']
+sample_list = ['CAPERS_EGS_V0.2.2', 'CAPERS_COSMOS_V0.2.1', 'CAPERS_UDS_V0.1']
 
 df_list, sum_rows = [], 0
 for sample in sample_list:
@@ -31,8 +31,6 @@ print('Sum total', sum_rows)
 print('All unique', df_combined.index.is_unique)
 df_combined.sort_values(by=['MPT_number'], inplace=True)
 
-fname = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/source/CAPERS_sample_file_log.txt'
-lime.save_frame(fname, df_combined)
-
 fname = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/source/CAPERS_sample_file_log.csv'
 lime.save_frame(fname, df_combined)
+

@@ -1,4 +1,5 @@
 import lime
+import numpy as np
 import pandas as pd
 from support.tools import search_spectra_capers, create_backup
 from pathlib import Path
@@ -54,12 +55,11 @@ for idx_spec, fits_file in enumerate(spectra_list):
         dir_parts = fits_file.parts[1:-1]
         file_dir = Path(*dir_parts)
         file_name = fits_file.name
-
         file_path = Path('/'.join(dir_parts[-2:]))
-        multipointing_check = True if 'MultiPointing' in fits_file.as_posix() else False
 
         name_comps = file_name.split('_')
         disp = 'prism'
+        multipointing_check = True if 'MultiPointing' in fits_file.as_posix() else False
         pointing_name = 'MultiPointing' if multipointing_check else name_comps[2]
 
         id_label = name_comps[3] if multipointing_check is False else name_comps[2]
@@ -72,7 +72,7 @@ for idx_spec, fits_file in enumerate(spectra_list):
         file_log.loc[(sample, id_label, pointing_name), ext] = file_name
         file_log.loc[(sample, id_label, pointing_name), "file_path"] = file_path.as_posix()
 
-    if sample == 'CAPERS_COSMOS_V0.2':
+    if 'COSMOS' in sample:
         dir_parts = fits_file.parts[1:-1]
         file_dir = Path(*dir_parts)
         file_name = fits_file.name
@@ -80,11 +80,20 @@ for idx_spec, fits_file in enumerate(spectra_list):
 
         name_comps = file_name.split('_')
         disp = 'prism'
-        pointing_name = name_comps[2]
+        multipointing_check = True if 'MultiPointing' in fits_file.as_posix() else False
+        pointing_name = 'MultiPointing' if multipointing_check else name_comps[2]
 
-        id_label = name_comps[3]
+        id_label = name_comps[3] if multipointing_check is False else name_comps[2]
         MPT_number = int(id_label[1:])
         ext = name_comps[-1][0:-5]
+
+        # name_comps = file_name.split('_')
+        # disp = 'prism'
+        # pointing_name = name_comps[2]
+        #
+        # id_label = name_comps[3]
+        # MPT_number = int(id_label[1:])
+        # ext = name_comps[-1][0:-5]
 
         file_log.loc[(sample, id_label, pointing_name), "MPT_number"] = MPT_number
         file_log.loc[(sample, id_label, pointing_name), "disp"] = disp
@@ -116,45 +125,71 @@ for idx_spec, fits_file in enumerate(spectra_list):
 # Adjust and organize the dataframe
 file_log.sort_values(by=['MPT_number'], ascending=[True], inplace=True)
 
-# Add previous measurements
+# Add CAPERS photometric predictions
 MPT_list = redshift_df.index.unique()
 redshift_headers  = redshift_df.columns.to_numpy()
+missing_objects = []
 for MPT in MPT_list:
     idcs_obj = file_log.MPT_number == MPT
-    for hdr in redshift_headers:
-        if hdr in file_log.columns:
-            formatted_entry = str(redshift_df.loc[MPT, hdr]).replace(' ','')
-            if 'flux_' not in hdr:
-                file_log.loc[idcs_obj, hdr] = formatted_entry
-            else:
-                file_log.loc[idcs_obj, hdr.lower()] = formatted_entry
+    if np.any(idcs_obj):
+        for hdr in redshift_headers:
+            if hdr in file_log.columns:
+                formatted_entry = str(redshift_df.loc[MPT, hdr]).replace(' ','')
+                if 'flux_' not in hdr:
+                    file_log.loc[idcs_obj, hdr] = formatted_entry
+                else:
+                    file_log.loc[idcs_obj, hdr.lower()] = formatted_entry
+    else:
+        missing_objects.append(MPT)
+
+if len(missing_objects) > 0:
+    print(f"These objects are not on the {capers_cfg['file_structure'][f'{sample}_redshift_file']} database:")
+    print(f'{np.sort(missing_objects)}')
 
 # Reassign previous redshifts
-if sample == 'CAPERS_EGS_V0.2.1':
-    previous_version_fname = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/sample/CAPERS_EGS_V0.2/tables/CAPERS_EGS_V0.2_files_log_DataSource.txt'
-    redshift_manual_df = lime.load_frame(previous_version_fname, levels=["sample", "id", "file"])
-    idcs_manual = redshift_manual_df.loc[pd.notnull(redshift_manual_df.z_manual)].index
-    for idx in idcs_manual:
-        pointing =  redshift_manual_df.loc[idx, 'pointing']
-        idx_new = (sample, idx[1], pointing)
-        if idx_new not in file_log.index:
-            print(f'WARNING {idx_new} NOTTTT THERE!!!!!')
-        else:
-            file_log.loc[idx_new, 'z_manual'] = redshift_manual_df.loc[idx, 'z_manual']
-            file_log.loc[idx_new, 'z_tier'] = 3
+if sample == 'CAPERS_EGS_V0.2.2':
+    previous_version_fname = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/sample/CAPERS_EGS_V0.2.2/tables/CAPERS_EGS_V0.2.1_files_log_the_source.txt'
+    redshift_manual_df = lime.load_frame(previous_version_fname, levels=["sample", "id", "pointing"])
 
-if sample == 'CAPERS_UDS_V0.1':
-    previous_version_fname = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/sample/CAPERS_UDS_V0.1/tables/CAPERS_UDS_V0.1_files_log_data_source.txt'
-    redshift_manual_df = lime.load_frame(previous_version_fname, levels=["sample", "id", "file"])
-    idcs_manual = redshift_manual_df.loc[pd.notnull(redshift_manual_df.z_manual)].index
-    for idx in idcs_manual:
-        pointing =  redshift_manual_df.loc[idx, 'pointing']
-        idx_new = (idx[0], idx[1], pointing)
-        if idx_new not in file_log.index:
-            print(f'WARNING {idx_new} NOTTTT THERE!!!!!')
+    for idx in redshift_manual_df.index:
+        idx_new = ('CAPERS_EGS_V0.2.2', idx[1], idx[2])
+
+        if idx_new in file_log.index:
+            if redshift_manual_df.loc[idx, 'z_manual'] is not None:
+                file_log.loc[idx_new, 'z_manual'] = redshift_manual_df.loc[idx, 'z_manual']
+                file_log.loc[idx_new, 'z_tier'] = 3
+            # else:
+            #     file_log.loc[idx_new, 'z_manual'] = -1
+            #     file_log.loc[idx_new, 'z_tier'] = -1
         else:
-            file_log.loc[idx_new, 'z_manual'] = redshift_manual_df.loc[idx, 'z_manual']
-            file_log.loc[idx_new, 'z_tier'] = 3
+            print(f'WARNING {idx} NOTTTT THERE!!!!!')
+
+# if sample == 'CAPERS_UDS_V0.1':
+#     previous_version_fname = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/sample/CAPERS_UDS_V0.1/tables/CAPERS_UDS_V0.1_files_log_data_source.txt'
+#     redshift_manual_df = lime.load_frame(previous_version_fname, levels=["sample", "id", "file"])
+#     idcs_manual = redshift_manual_df.loc[pd.notnull(redshift_manual_df.z_manual)].index
+#     for idx in idcs_manual:
+#         pointing =  redshift_manual_df.loc[idx, 'pointing']
+#         idx_new = (idx[0], idx[1], pointing)
+#         if idx_new not in file_log.index:
+#             print(f'WARNING {idx_new} NOTTTT THERE!!!!!')
+#         else:
+#             file_log.loc[idx_new, 'z_manual'] = redshift_manual_df.loc[idx, 'z_manual']
+#             file_log.loc[idx_new, 'z_tier'] = 3
+#
+# if sample == 'CAPERS_COSMOS_V0.2.1':
+#     previous_sample = 'CAPERS_COSMOS_V0.2'
+#     previous_version_fname = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/sample/CAPERS_COSMOS_V0.2/tables/CAPERS_COSMOS_V0.2_files_log.txt'
+#     redshift_manual_df = lime.load_frame(previous_version_fname, levels=["sample", "id", "pointing"])
+#     idcs_manual = redshift_manual_df.loc[pd.notnull(redshift_manual_df.z_manual)].index
+#     for idx_old in idcs_manual:
+#         pointing =  redshift_manual_df.loc[idx_old].name[2]# redshift_manual_df.loc[idx, 'pointing']
+#         idx_new = (sample, idx_old[1], pointing)
+#         if idx_new not in file_log.index:
+#             print(f'WARNING {idx_new} NOTTTT THERE!!!!!')
+#         else:
+#             file_log.loc[idx_new, 'z_manual'] = redshift_manual_df.loc[idx_old, 'z_manual']
+#             file_log.loc[idx_new, 'z_tier'] = 3
 
 # Save the log
 lime.save_frame(tables_folder/f'{sample}_files_log.txt', file_log)

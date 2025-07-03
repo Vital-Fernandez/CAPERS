@@ -21,7 +21,7 @@ logs_folder = data_folder/sample/'line_logs'
 comps_folder = data_folder/sample/'comps'
 R_interpolator = read_prism_r_curve(capers_cfg['file_structure']['prism_R_curve_file'], units_factor=10000)
 
-prism_bands_df = lime.load_frame(data_folder/capers_cfg['file_structure']['prism_bands'])
+# prism_bands_df = lime.load_frame(data_folder/capers_cfg['file_structure']['prism_bands'])
 
 fname = '/home/vital/Downloads/CAPERS-COSMOS_p4_s000119334_x1d_optext.fits'
 z = 9.287

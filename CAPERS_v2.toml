@@ -119,6 +119,12 @@ O3_4960A_kinem = "O3_5008A"
 O3_4960A_amp = "expr:O3_5008A_amp/2.91"
 H1_4863A_amp = "min:3"
 
+H1_4342A_b = "H1_4342A+O3_4363A"
+H1_4342A_kinem = "H1_4863A_k-1"
+O3_4363A_kinem = "O3_5008A"
+O3_4363A_amp = "min:3"
+
+
 #H1_4342A_b = "H1_4342A+H1_4342A_k-1"
 #H1_4342A_k-1_center = 'expr:H1_4342A_center'
 #H1_4342A_k-1_sigma = "expr:4*H1_4342A_sigma"
@@ -136,9 +142,7 @@ H1_4863A_amp = "min:3"
 #H1_4342A_amp = "min:3"
 #H1_4342A_k-1_amp = "min:10"
 
-H1_4342A_b = "H1_4342A+O3_4363A"
-O3_4363A_kinem = "O3_5008A"
-O3_4363A_amp = "min:3"
+
 
 #H1_4342A_b = "H1_4342A+O3_4363A"
 #H1_4342A_sigma = "expr:>1.5*O3_4363A_sigma"

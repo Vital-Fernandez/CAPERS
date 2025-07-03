@@ -293,6 +293,10 @@ def z_selection(files_sample, idx_obj):
             z_obj = files_sample.loc[idx_obj, 'z_manual']
         case 2:
             z_obj = files_sample.loc[idx_obj, 'z_aspect_key']
+        case 1:
+            z_obj = files_sample.loc[idx_obj, 'z_UNICORN']
+        case 0:
+            z_obj = files_sample.loc[idx_obj, 'z_UNICORN']
         case _:
             z_obj = None
 

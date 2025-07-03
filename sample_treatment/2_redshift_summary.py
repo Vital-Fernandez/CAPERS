@@ -64,10 +64,31 @@ idcs_null_opt = pd.isnull(table_df.optext)
 table_df.loc[idcs_null_opt, 'optext'] = table_df.loc[idcs_null_opt, 'x1d']
 table_df.rename(columns={'optext': 'file_name'}, inplace=True)
 
-table_df.loc[~idcs_manual, 'z_manual'] = -1
-lime.save_frame(source_folder/f'{sample}_redshifts_aspectv0.3_and_manual_inspection.txt',
-                table_df.loc[:, ['MPT_number', 'z_manual', 'file_name']])
 
+if sample == 'CAPERS_COSMOS_V0.2.1':
+    table_df['Notes'] = 'None'
+    notes_file = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/source/CAPERs spectra notes - COSMOS.csv'
+    id_list, notes_list = np.loadtxt(notes_file, skiprows=1, delimiter=',', unpack=True, dtype=str)
+    idcs_ids = table_df.index.get_level_values('id')
+    for i, id_number in enumerate(id_list):
+        idx_mpt = (idcs_ids == id_number)
+        table_df.loc[idx_mpt, 'Notes'] = notes_list[i]
+
+if 'EGS' in sample:
+    table_df['Notes'] = 'None'
+    notes_file = '/home/vital/Dropbox/Astrophysics/Data/CAPERS/source/CAPERS_EGS_notes.txt'
+    id_list, notes_list = np.loadtxt(notes_file, skiprows=1, delimiter=',', unpack=True, dtype=str)
+    idcs_ids = table_df.index.get_level_values('id')
+    for i, id_number in enumerate(id_list):
+        idx_mpt = (idcs_ids == id_number)
+        table_df.loc[idx_mpt, 'Notes'] = notes_list[i]
+
+table_df.loc[~idcs_manual, 'z_manual'] = -1
+lime.save_frame(source_folder/f'{sample}_redshifts_aspectv0.3_and_manual_inspection.csv',
+                table_df.loc[:, ['MPT_number', 'z_manual', 'file_name', 'Notes']])
+
+lime.save_frame(source_folder/f'{sample}_redshifts_aspectv0.3_and_manual_inspection.txt',
+                table_df.loc[:, ['MPT_number', 'z_manual', 'file_name', 'Notes']])
 
 # idcs_gaussian = files_sample.frame['z_gaussian'].notnull()
 #
