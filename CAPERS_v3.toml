@@ -119,10 +119,12 @@ transitions.O2_3726A_m.wavelength = 3728.484
 transitions.Ne3_3869A_m.wavelength = 3883.35
 transitions.H1_4861A_m.wavelength = 4943.74
 transitions.S2_6716A_m.wavelength = 6725.48
-transitions.O2_7319A.wavelength = 7326.845
+transitions.O2_7319A_m.wavelength = 7326.845
 
+He2_1640A_m = 'He2_1640A+O3_1661A+O3_1666A'
 O2_3726A_m = "O2_3726A+O2_3729A"
 Ne3_3869A_m = "Ne3_3869A+H1_3889A+He1_3889A"
+Ne3_3869A_b = "Ne3_3869A+H1_3889A_m"
 H1_3889A_m = "H1_3889A+He1_3889A"
 Ne3_3968A_m = "Ne3_3968A+H1_3970A"
 H1_4340A_b = "H1_4340A+O3_4363A"
@@ -213,3 +215,12 @@ H1_4861A_kinem = "O3_5007A"
 O3_4959A_kinem = "O3_5007A"
 O3_4959A_amp = "expr:O3_5007A_amp/2.91"
 H1_4861A_amp = "min:3"
+
+[s000153965_CAPERS_COSMOS_P6_s000153965_x1d_optext_line_fitting]
+
+H1_4861A_kinem = "O3_5007A"
+O3_4959A_kinem = "O3_5007A"
+O3_4959A_amp = "expr:O3_5007A_amp/2.91"
+H1_4861A_amp = "min:3"
+O3_4363A_kinem = "H1_4340A"
+H1_3889A_m_kinem = "Ne3_3869A"
