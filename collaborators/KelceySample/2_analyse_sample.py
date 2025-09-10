@@ -22,7 +22,7 @@ def rename_index(df, replace_dict):
 lime.theme.set_style('dark')
 
 # Load configuration
-cfg_file = '../rubies_v3.toml'
+cfg_file = 'rubies_v3.toml'
 capers_cfg = lime.load_cfg(cfg_file)
 
 # Get sample information

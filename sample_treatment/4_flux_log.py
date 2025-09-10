@@ -55,14 +55,18 @@ for sample in sample_list:
     # Store the df
     df_dict[sample] = flux_sample.frame
 
+    # Save individual fluxes
+    flux_sample.save_frame(source_folder/f'CAPERS_{sample}_flux_log.csv')
+    flux_sample.save_frame(source_folder/f'CAPERS_{sample}_flux_log.txt')
+
 # Combined the dataframes
 df_combined = pd.concat(list(df_dict.values()), ignore_index=False)
 
-# Sort the dataframe
-# df_combined.sort_values(by=[('sample', 'id'), 'wavelength'])
-
 # Save the combined frame
-flux_log_address = source_folder/f'CAPERS_sample_flux_log.csv'
+flux_log_address = source_folder/f'CAPERS_FIELDS_flux_log.csv'
+lime.save_frame(flux_log_address, df_combined)
+
+flux_log_address = source_folder/f'CAPERS_FIELDS_flux_log.txt'
 lime.save_frame(flux_log_address, df_combined)
 
 # # Load the sample table (create daily back-up if necessary)

@@ -8,7 +8,7 @@ from support.tools import search_spectra_capers, create_backup
 from pathlib import Path
 
 # Load configuration
-cfg_file = '../rubies_v3.toml'
+cfg_file = 'rubies_v3.toml'
 capers_cfg = lime.load_cfg(cfg_file)
 
 # Get sample information

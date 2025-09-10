@@ -10,7 +10,7 @@ from support.tools import (create_backup, capers_load_function, save_detection_r
 lime.lineDB.set_database(vacuum_waves=True)
 
 # Load configuration
-cfg_file = '../CAPERS_v3.toml'
+cfg_file = '../../CAPERS_v3.toml'
 capers_cfg = lime.load_cfg(cfg_file)
 
 # Get sample information
